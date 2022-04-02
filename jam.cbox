@@ -2,3 +2,10 @@ test
 {
     value 30
 }
+
+hand_move
+{
+    k 20
+    max_spd 5
+    slap_accel 5.5
+}
