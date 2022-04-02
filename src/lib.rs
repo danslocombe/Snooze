@@ -116,12 +116,44 @@ pub extern "C" fn set_fixed(nid: f64) -> f64 {
 
 #[no_mangle]
 #[gms_bind]
+pub extern "C" fn set_free(nid: f64) -> f64 {
+    unsafe {
+        let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
+        let mut node = state.world.get_node_mut(nid.round() as usize);
+        node.node_type = rope_lib::NodeType::Free;
+        0.0
+    }
+}
+
+#[no_mangle]
+#[gms_bind]
 pub extern "C" fn set_node_pos(nid: f64, x: f64, y: f64) -> f64 {
+    unsafe {
+        let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
+        let pos = rope_lib::Vec2::new(x as f32, y as f32);
+        let mut node = state.world.get_node_mut(nid.round() as usize);
+        node.pos = pos;
+        0.0
+    }
+}
+
+#[no_mangle]
+#[gms_bind]
+pub extern "C" fn set_node_pos_player(nid: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let pos = rope_lib::Vec2::new(x as f32, y as f32);
         state.world.set_node_pos_respect_colliders(nid.round() as usize, pos);
         0.0
+    }
+}
+
+#[no_mangle]
+#[gms_bind]
+pub extern "C" fn get_tension() -> f64 {
+    unsafe {
+        let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
+        state.world.get_tension() as f64
     }
 }
 
@@ -235,6 +267,17 @@ pub extern "C" fn get_rope_broken(id: f64) -> f64 {
         } else {
             0.0
         }
+    }
+}
+
+#[no_mangle]
+#[gms_bind]
+pub extern "C" fn set_rope_broken(id: f64) -> f64 {
+    unsafe {
+        let mut state = GLOBAL_ROPEWORLD.as_mut().unwrap();
+        let rope = state.world.get_rope_mut(id.round() as usize);
+        rope.broken = true;
+        0.0
     }
 }
 
