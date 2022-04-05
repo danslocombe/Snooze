@@ -1,13 +1,30 @@
 #![allow(unused_parens)]
 
+mod rope;
+
 use gms_binder::*;
-use crossbeam_epoch::{self as epoch};
 
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::time::Instant;
 
-static mut GLOBAL_ROPEWORLD: Option<rope_lib::GlobalState> = None;
+pub struct GlobalState {
+    pub t: usize,
+    pub world: rope::World,
+    pub last_tick: Instant,
+}
+
+impl GlobalState {
+    pub fn new() -> Self {
+        Self {
+            t: 0,
+            world: rope::World::default(),
+            last_tick: Instant::now(),
+        }
+    }
+}
+
+static mut GLOBAL_ROPEWORLD: Option<GlobalState> = None;
 
 gms_bind_start!("ld50_lib", "ld50_lib.dll", "lib");
 
@@ -15,7 +32,7 @@ gms_bind_start!("ld50_lib", "ld50_lib.dll", "lib");
 #[gms_bind]
 pub extern "C" fn rope_reset() -> f64 {
     unsafe {
-        GLOBAL_ROPEWORLD = Some(rope_lib::GlobalState::new());
+        GLOBAL_ROPEWORLD = Some(GlobalState::new());
     }
     0.0
 }
@@ -46,7 +63,7 @@ pub extern "C" fn set_fixed(nid: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let mut node = state.world.get_node_mut(nid.round() as usize);
-        node.node_type = rope_lib::NodeType::Fixed;
+        node.node_type = rope::NodeType::Fixed;
         0.0
     }
 }
@@ -57,7 +74,7 @@ pub extern "C" fn set_free(nid: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let mut node = state.world.get_node_mut(nid.round() as usize);
-        node.node_type = rope_lib::NodeType::Free;
+        node.node_type = rope::NodeType::Free;
         0.0
     }
 }
@@ -67,7 +84,7 @@ pub extern "C" fn set_free(nid: f64) -> f64 {
 pub extern "C" fn set_node_pos(nid: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        let pos = rope_lib::Vec2::new(x as f32, y as f32);
+        let pos = rope::Vec2::new(x as f32, y as f32);
         let mut node = state.world.get_node_mut(nid.round() as usize);
         node.pos = pos;
         0.0
@@ -79,7 +96,7 @@ pub extern "C" fn set_node_pos(nid: f64, x: f64, y: f64) -> f64 {
 pub extern "C" fn set_node_pos_player(nid: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        let pos = rope_lib::Vec2::new(x as f32, y as f32);
+        let pos = rope::Vec2::new(x as f32, y as f32);
         state.world.set_node_pos_respect_colliders(nid.round() as usize, pos);
         0.0
     }
@@ -174,8 +191,8 @@ pub extern "C" fn toggle_node(id: f64) -> f64 {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let mut node = state.world.get_node_mut(id.round() as usize);
         node.node_type = match node.node_type {
-            rope_lib::NodeType::Free => rope_lib::NodeType::Fixed,
-            rope_lib::NodeType::Fixed => rope_lib::NodeType::Free,
+            rope::NodeType::Free => rope::NodeType::Fixed,
+            rope::NodeType::Fixed => rope::NodeType::Free,
         };
 
         0.0
@@ -188,8 +205,8 @@ pub extern "C" fn get_node_type(id: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_ref().unwrap();
         match state.world.get_node(id.round() as usize).node_type {
-            rope_lib::NodeType::Free => 0.0,
-            rope_lib::NodeType::Fixed => 1.0,
+            rope::NodeType::Free => 0.0,
+            rope::NodeType::Fixed => 1.0,
         }
     }
 }
@@ -250,8 +267,8 @@ pub extern "C" fn get_sim_t() -> f64 {
 pub extern "C" fn add_static_force(x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        state.world.forces.push(Box::new(rope_lib::ConstantForce {
-            force: rope_lib::Vec2::new(x as f32, y as f32),
+        state.world.forces.push(Box::new(rope::ConstantForce {
+            force: rope::Vec2::new(x as f32, y as f32),
         }));
 
         0.0
@@ -263,9 +280,9 @@ pub extern "C" fn add_static_force(x: f64, y: f64) -> f64 {
 pub extern "C" fn add_inverse_square_force(strength: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        state.world.forces.push(Box::new(rope_lib::InverseSquareForce {
+        state.world.forces.push(Box::new(rope::InverseSquareForce {
             strength: strength as f32,
-            pos: rope_lib::Vec2::new(x as f32, y as f32),
+            pos: rope::Vec2::new(x as f32, y as f32),
         }));
 
         0.0
