@@ -1,3 +1,7 @@
+#![allow(unused_parens)]
+
+use std::time::Instant;
+
 #[derive(Default)]
 pub struct World {
     pub nodes: Vec<RopeNode>,
@@ -389,5 +393,22 @@ impl Force for InverseSquareForce {
         let d = delta.mag();
         let mag = self.strength / d2;
         delta.mult(mag / d)
+    }
+}
+
+
+pub struct GlobalState {
+    pub t: usize,
+    pub world: World,
+    pub last_tick: Instant,
+}
+
+impl GlobalState {
+    pub fn new() -> Self {
+        Self {
+            t: 0,
+            world: World::default(),
+            last_tick: Instant::now(),
+        }
     }
 }

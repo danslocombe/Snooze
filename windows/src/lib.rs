@@ -1,16 +1,16 @@
 #![allow(unused_parens)]
 
-mod rope;
-
 use gms_binder::*;
 
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::os::raw::c_char;
 use std::time::Instant;
 
+use ld50_lib::*;
+
 pub struct GlobalState {
     pub t: usize,
-    pub world: rope::World,
+    pub world: World,
     pub last_tick: Instant,
 }
 
@@ -18,7 +18,7 @@ impl GlobalState {
     pub fn new() -> Self {
         Self {
             t: 0,
-            world: rope::World::default(),
+            world: World::default(),
             last_tick: Instant::now(),
         }
     }
@@ -63,7 +63,7 @@ pub extern "C" fn set_fixed(nid: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let mut node = state.world.get_node_mut(nid.round() as usize);
-        node.node_type = rope::NodeType::Fixed;
+        node.node_type = NodeType::Fixed;
         0.0
     }
 }
@@ -74,7 +74,7 @@ pub extern "C" fn set_free(nid: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let mut node = state.world.get_node_mut(nid.round() as usize);
-        node.node_type = rope::NodeType::Free;
+        node.node_type = NodeType::Free;
         0.0
     }
 }
@@ -84,7 +84,7 @@ pub extern "C" fn set_free(nid: f64) -> f64 {
 pub extern "C" fn set_node_pos(nid: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        let pos = rope::Vec2::new(x as f32, y as f32);
+        let pos = Vec2::new(x as f32, y as f32);
         let mut node = state.world.get_node_mut(nid.round() as usize);
         node.pos = pos;
         0.0
@@ -96,7 +96,7 @@ pub extern "C" fn set_node_pos(nid: f64, x: f64, y: f64) -> f64 {
 pub extern "C" fn set_node_pos_player(nid: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        let pos = rope::Vec2::new(x as f32, y as f32);
+        let pos = Vec2::new(x as f32, y as f32);
         state.world.set_node_pos_respect_colliders(nid.round() as usize, pos);
         0.0
     }
@@ -191,8 +191,8 @@ pub extern "C" fn toggle_node(id: f64) -> f64 {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let mut node = state.world.get_node_mut(id.round() as usize);
         node.node_type = match node.node_type {
-            rope::NodeType::Free => rope::NodeType::Fixed,
-            rope::NodeType::Fixed => rope::NodeType::Free,
+            NodeType::Free => NodeType::Fixed,
+            NodeType::Fixed => NodeType::Free,
         };
 
         0.0
@@ -205,8 +205,8 @@ pub extern "C" fn get_node_type(id: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_ref().unwrap();
         match state.world.get_node(id.round() as usize).node_type {
-            rope::NodeType::Free => 0.0,
-            rope::NodeType::Fixed => 1.0,
+            NodeType::Free => 0.0,
+            NodeType::Fixed => 1.0,
         }
     }
 }
@@ -228,7 +228,7 @@ pub extern "C" fn get_rope_broken(id: f64) -> f64 {
 #[gms_bind]
 pub extern "C" fn set_rope_broken(id: f64) -> f64 {
     unsafe {
-        let mut state = GLOBAL_ROPEWORLD.as_mut().unwrap();
+        let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         let rope = state.world.get_rope_mut(id.round() as usize);
         rope.broken = true;
         0.0
@@ -267,8 +267,8 @@ pub extern "C" fn get_sim_t() -> f64 {
 pub extern "C" fn add_static_force(x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        state.world.forces.push(Box::new(rope::ConstantForce {
-            force: rope::Vec2::new(x as f32, y as f32),
+        state.world.forces.push(Box::new(ConstantForce {
+            force: Vec2::new(x as f32, y as f32),
         }));
 
         0.0
@@ -280,9 +280,9 @@ pub extern "C" fn add_static_force(x: f64, y: f64) -> f64 {
 pub extern "C" fn add_inverse_square_force(strength: f64, x: f64, y: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        state.world.forces.push(Box::new(rope::InverseSquareForce {
+        state.world.forces.push(Box::new(InverseSquareForce {
             strength: strength as f32,
-            pos: rope::Vec2::new(x as f32, y as f32),
+            pos: Vec2::new(x as f32, y as f32),
         }));
 
         0.0
