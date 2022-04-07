@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="pragma" content="no-cache"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name ="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta charset="utf-8"/>
+
+        <title>Crunda</title>
+
+        <style>
+            body {
+              background: #000000;
+              color:#cccccc;
+              margin: 0px;
+              padding: 0px;
+              border: 0px;
+            }
+            :-webkit-full-screen #canvasold {
+                 width: 100%;
+                 height: 100%;
+            }
+            div.gm4html5_div_class
+            {
+              margin: auto;
+              padding: 0px;
+              border: 0px;
+              width: 45%;
+            }
+
+            #geg
+            {
+                width: auto;
+                margin: 10px;
+                padding: 15px 32px;
+            }
+
+            #playButton {
+                background-color: black;
+                border: white;
+                color: white;
+                border-style: solid;
+            }
+
+            :-webkit-full-screen {
+               width: 100%;
+               height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="gm4html5_div_class">
+            <div id = "geg">
+                <p>
+                    <img src="./html5game/splash.png" />
+                    <br />
+                    <br />
+                    <h5>A game made for ludum dare 49. <a href = "https://ldjam.com/events/ludum-dare/49/crunda">Entry here</a></h5>
+                    <h5>Web port, for the full experience download the windows version, this one has dodgy text rendering :(</h5>
+                    <br />
+                </p>
+                <button id = "playButton" onclick="document.getElementById('geg').style.display = 'none'; GameMaker_Init()"> <h1>Play Crunda</h1></button>
+            </div>
+            <!-- Create the canvas element the game draws to -->
+            <canvas id="canvas" width="512" height="512">
+               <p>Your browser doesn't support HTML5 canvas.</p>
+            </canvas>
+        </div>
+
+        <!-- Run the game code -->
+        <script src="./bootstrap.js"></script>
+        <!-- <script>window.onload = GameMaker_Init;</script> -->
+    </body>
+</html>

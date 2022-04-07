@@ -396,19 +396,3 @@ impl Force for InverseSquareForce {
     }
 }
 
-
-pub struct GlobalState {
-    pub t: usize,
-    pub world: World,
-    pub last_tick: Instant,
-}
-
-impl GlobalState {
-    pub fn new() -> Self {
-        Self {
-            t: 0,
-            world: World::default(),
-            last_tick: Instant::now(),
-        }
-    }
-}

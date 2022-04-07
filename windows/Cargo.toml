@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 ld50_lib = { path = "../core" }
 gms_binder = { path = "../../gms_binder" }
+
+[lib]
+crate-type = ["dylib"]

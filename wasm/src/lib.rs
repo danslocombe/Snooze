@@ -21,6 +21,7 @@ impl GlobalState {
         }
     }
 }
+
 static mut GLOBAL_ROPEWORLD: Option<GlobalState> = None;
 
 #[wasm_bindgen]
@@ -99,17 +100,6 @@ pub fn get_tension() -> f64 {
 }
 
 #[wasm_bindgen]
-pub fn add_rope(from: f64, to: f64) -> f64 {
-    unsafe {
-        let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
-        let id = state
-            .world
-            .add_rope(from.round() as usize, to.round() as usize);
-        id as f64
-    }
-}
-
-#[wasm_bindgen]
 pub extern "C" fn add_rope_length(from: f64, to: f64, len : f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
@@ -152,5 +142,27 @@ pub fn get_node_y(id: f64) -> f64 {
     unsafe {
         let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
         state.world.get_node(id.round() as usize).pos.y as f64
+    }
+}
+
+#[wasm_bindgen]
+pub fn get_rope_broken(id: f64) -> f64 {
+    unsafe {
+        let state = GLOBAL_ROPEWORLD.as_ref().unwrap();
+        if (state.world.get_rope(id.round() as usize).broken) {
+            1.0
+        } else {
+            0.0
+        }
+    }
+}
+
+#[wasm_bindgen]
+pub fn set_rope_broken(id: f64) -> f64 {
+    unsafe {
+        let state = GLOBAL_ROPEWORLD.as_mut().unwrap();
+        let rope = state.world.get_rope_mut(id.round() as usize);
+        rope.broken = true;
+        0.0
     }
 }
